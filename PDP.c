@@ -8,8 +8,11 @@ typedef unsigned short int word;
 typedef word adr;
 
 byte mem [64 * 1024];
+word reg [8];
 
 #define pc reg[7]
+#define REG 1
+#define MEM 0
 #define NO_PARAM 0
 #define HAS_SS 1
 #define HAS_DD (1 << 1) //2
@@ -20,11 +23,15 @@ word w_read  (adr a);
 void w_write (adr a, word val);
 byte b_read  (adr a);  
 void b_write (adr a, byte val);
+void get_nn (word w);
+void get_xx (word w);
+
 
 void load_file (char * file);
 struct P_Command create_command (word w);
 void run (adr pc0, char ** argv);
 
+struct mr get_mode (word r, word mode, word b);
 struct P_Command
 {
 	word w;       // word
@@ -46,6 +53,15 @@ struct Command
 } commands [] =
 {
 };
+
+struct mr 
+{
+	word ad;		// address
+	dword val;		// value                              
+	dword res;		// result                                         
+	word space; 	// address in mem[ ] or reg[ ]
+} ss, dd, hh, nn;
+
 
 byte b_read(adr a)
 {
@@ -86,6 +102,52 @@ struct P_Command create_command(word w)
 	c.mode_r2 = (w >> 3) & 7;
 	c.r2 = w & 7;
 	return c;
+}
+
+struct mr get_mode (word r, word mode, word b)//register, mode of this register, byte 
+{
+	switch(mode)
+	{
+		case 0:
+		{
+		}
+
+		case 1:
+		{
+		}
+
+		case 2:
+		{
+        }
+	    case 3:
+		}
+	    case 4:
+		{
+		}
+	    case 5:
+		{
+		}
+	    case 6:
+		{
+		}
+	}
+	return hh;
+}
+
+void get_nn (word w)
+{
+	nn.ad = (w >> 6) & 07;
+	nn.val = w & 077;
+	printf ("R%o , %o", nn.ad, pc - 2*nn.val);
+	//printf(com, "------\n%o\n------\n", w);
+}
+
+void get_xx (word w)
+{
+	xx.val = w & 0xff;
+	unsigned int x = pc + 2*xx.val;
+	printf("%06o ", x);
+	//xx.sign = ((w >> 7) & 01);
 }
 
 void load_file(char * file)
@@ -130,7 +192,7 @@ void run(adr pc0, char ** argv)
 				printf("%s ", commands[i].name);
 				if (cmd.param & HAS_SS)
 				{
-					if(commands[i].name == "mul")
+					if(commands[i].name == "mul")  //отличается от всех, обратить внимание
 					{
 						ss = get_mode (PC.r2, PC.mode_r2, PC.B);
 						printf (", ");
@@ -147,7 +209,7 @@ void run(adr pc0, char ** argv)
 				}
 				if (cmd.param & HAS_NN)
 				{
-					get_nn (w);
+					get_nn(w);
 				}
 				if(cmd.param & HAS_XX)
 				{
