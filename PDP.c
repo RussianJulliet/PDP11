@@ -32,6 +32,12 @@ void load_file (char * file);
 struct P_Command create_command (word w);
 void run (adr pc0, char ** argv);
 
+void do_halt (struct P_Command PC);
+void do_movb(struct P_Command PC);
+void do_mov (struct P_Command PC);
+void do_add (struct P_Command PC);
+void do_sob (struct P_Command PC);
+
 struct mr get_mode (word r, word mode, word b);
 struct P_Command
 {
@@ -68,6 +74,11 @@ struct mr
 	word space; 	// address in mem[ ] or reg[ ]
 } ss, dd, hh, nn;
 
+struct sign
+{
+	char val;
+	char sign;
+}xx;
 
 byte b_read(adr a)
 {
@@ -102,6 +113,30 @@ void do_halt (struct P_Command PC)
 	printf("\n");
 	print_beauty();
 	exit(0);
+}
+
+void do_sob (struct P_Command PC)
+{
+	reg[nn.ad]--;
+	if (reg[nn.ad] != 0)
+	{
+		reg[7] -= 2 * nn.val;
+	}
+	printf ("\n");
+}
+
+void do_mov (struct P_Command PC)
+{
+	dd.res = ss.val;
+	if(dd.space == REG)
+	{
+		reg[dd.ad]= dd.res;
+	}
+	else
+	{
+		w_write(dd.ad, dd.res);
+	}
+	printf("\n");
 }
 
 struct P_Command create_command(word w)
