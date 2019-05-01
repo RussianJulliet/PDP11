@@ -123,16 +123,44 @@ struct mr get_mode (word r, word mode, word b)//register, mode of this register,
 	{
 		case 0:
 		{
+            printf("R%o", r);
+			hh.ad = r;
+			hh.val = reg[r];
+			hh.space = REG;
+			break;
 		}
 
 		case 1:
 		{
+            printf ("@R%o", r);
+			hh.ad = reg[r];
+			hh.val = w_read ((adr) reg[r]);
+			hh.space = MEM;
+			break;
 		}
 
 		case 2:
 		{
+            if (r == 7 || r == 6 || b == 0)   //зависит от типа инструкции : байтовая или пословная
+			{
+				printf ("#%o", w_read ((adr) reg[r]));
+				hh.ad = reg[r];
+				hh.val = w_read ((adr) reg[r]);
+				hh.space = MEM;
+				reg[r] += 2;
+			}
+			else
+			{
+				printf ("(R%o)+", r);
+				hh.ad =  reg[r];
+				hh.val = b_read ((adr) reg[r]);
+				hh.space = MEM;
+				reg[r] ++;
+			}
+			break;
         }
 	    case 3:
+        {
 		}
 	    case 4:
 		{
