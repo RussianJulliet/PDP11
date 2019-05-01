@@ -6,6 +6,7 @@
 typedef unsigned char byte;
 typedef unsigned short int word;
 typedef word adr;
+typedef int dword;
 
 byte mem [64 * 1024];
 word reg [8];
@@ -52,6 +53,11 @@ struct Command
 	byte param;                        //parametr of commmand
 } commands [] =
 {
+    {	  0,	0177777,	"halt",		do_halt,	NO_PARAM		},
+	{010000,	0170000,	"mov",		do_mov, 	HAS_SS | HAS_DD	},
+	{0110000, 	0170000,	"movb", 	do_movb, 	HAS_SS | HAS_DD },
+	{060000, 	0170000,	"add",		do_add,		HAS_DD | HAS_SS	},
+	{077000,	0177000,	"sob",		do_sob,		HAS_NN			}
 };
 
 struct mr 
@@ -89,6 +95,13 @@ void w_write (adr a, word val)
 	assert((a % 2) == 0);
 	mem[a] = (byte) val;
 	mem[a + 1] = (byte) (val >> 8);
+}
+
+void do_halt (struct P_Command PC)
+{
+	printf("\n");
+	print_beauty();
+	exit(0);
 }
 
 struct P_Command create_command(word w)
@@ -139,7 +152,6 @@ void get_nn (word w)
 	nn.ad = (w >> 6) & 07;
 	nn.val = w & 077;
 	printf ("R%o , %o", nn.ad, pc - 2*nn.val);
-	//printf(com, "------\n%o\n------\n", w);
 }
 
 void get_xx (word w)
@@ -147,7 +159,6 @@ void get_xx (word w)
 	xx.val = w & 0xff;
 	unsigned int x = pc + 2*xx.val;
 	printf("%06o ", x);
-	//xx.sign = ((w >> 7) & 01);
 }
 
 void load_file(char * file)
