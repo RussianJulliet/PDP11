@@ -10,6 +10,7 @@ typedef int dword;
 
 byte mem [64 * 1024];
 word reg [8];
+struct Flags flags;
 
 #define pc reg[7]
 #define REG 1
@@ -49,6 +50,17 @@ struct P_Command
 	word mode_r2; // mode 2 operand
 	word r2;      // 2 operand
 };
+
+struct Flags
+{
+	word C;
+	word Z;
+	word N;
+	word V; //не реал-м 
+};
+
+
+
 
 struct Command
 {
@@ -108,6 +120,20 @@ void w_write (adr a, word val)
 	mem[a + 1] = (byte) (val >> 8);
 }
 
+void change_flag(struct P_Command PC)
+{
+    if (PC.B)
+    {
+        flags.N = (dd.res >> 7) & 1;
+	}
+	else 
+    {
+        flags.N = (dd.res >> 15) & 1;
+    }
+    flags.Z = (dd.res == 0);
+
+}
+
 void print_reg() {
     int i = 0;
     printf("\n\n");
@@ -149,6 +175,7 @@ void do_mov (struct P_Command PC)
 		w_write(dd.ad, dd.res);
 	}
 	printf("\n");
+    change_flag(PC);
 }
 
 void do_movb(struct P_Command PC) 
@@ -163,6 +190,7 @@ void do_add(struct P_Command PC) {
     else {
         w_write(dd.ad, dd.res);
     }
+    change_flag(PC);
     
 }
 
