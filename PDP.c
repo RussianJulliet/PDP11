@@ -26,7 +26,7 @@ byte b_read  (adr a);
 void b_write (adr a, byte val);
 void get_nn (word w);
 void get_xx (word w);
-
+void print_reg();
 
 void load_file (char * file);
 struct P_Command create_command (word w);
@@ -108,10 +108,22 @@ void w_write (adr a, word val)
 	mem[a + 1] = (byte) (val >> 8);
 }
 
+void print_reg() {
+    int i = 0;
+    printf("\n\n");
+    printf("Print registers : ");
+    for (i = 0; i < 7; i++)
+    {
+        printf("R[%d]=%o, ", i, reg[i]);
+    }
+    printf("R[%d]=%o\n", i, reg[i]);
+
+}
+
 void do_halt (struct P_Command PC)
 {
 	printf("\n");
-	print_beauty();
+    print_reg();
 	exit(0);
 }
 
@@ -137,6 +149,21 @@ void do_mov (struct P_Command PC)
 		w_write(dd.ad, dd.res);
 	}
 	printf("\n");
+}
+
+void do_movb(struct P_Command PC) 
+    {
+    }
+
+void do_add(struct P_Command PC) {
+    dd.res = dd.val + ss.val;
+    if (dd.space == REG) {
+        reg[dd.ad] = dd.res;
+    }
+    else {
+        w_write(dd.ad, dd.res);
+    }
+    
 }
 
 struct P_Command create_command(word w)
@@ -176,27 +203,32 @@ struct mr get_mode (word r, word mode, word b)//register, mode of this register,
 
 		case 2:
 		{
+			hh.space = MEM;
+			hh.ad = reg[r];
+			hh.val = b ? b_read((adr)reg[r]) : w_read ((adr) reg[r]);
             if (r == 7 || r == 6 || b == 0)   //зависит от типа инструкции : байтовая или пословная
-			{
-				printf ("#%o", w_read ((adr) reg[r]));
-				hh.ad = reg[r];
-				hh.val = w_read ((adr) reg[r]);
-				hh.space = MEM;
 				reg[r] += 2;
-			}
 			else
-			{
-				printf ("(R%o)+", r);
-				hh.ad =  reg[r];
-				hh.val = b_read ((adr) reg[r]);
-				hh.space = MEM;
 				reg[r] ++;
-			}
+            if (r == 7)
+				printf ("(R%o)+", r);
+            else
+				printf ("#%o", hh.val);
 			break;
         }
 	    case 3:
         {
-		}
+			hh.space = MEM;
+			hh.ad = reg[r];
+            hh.ad = w_read(hh.ad);
+			hh.val = b ? b_read((adr)reg[r]) : w_read ((adr) reg[r]);
+			reg[r] += 2;
+            if (r == 7)
+				printf ("@(R%o)+", r);
+            else
+				printf ("@#%o", hh.ad);
+            break;
+        }
 	    case 4:
 		{
 		}
