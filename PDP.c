@@ -119,10 +119,19 @@ byte b_read(adr a)
 {
 	return mem[a];
 }
-
+/*
 void b_write (adr a, byte val)
 {
     mem[a] = val;
+}*/
+
+void b_write(adr a, byte val)
+{
+	mem[a] = val;
+	if(a == 0177566)
+	{
+		fprintf(stderr, " %c ", mem[a]);
+	}
 }
 
 word w_read (adr a)
@@ -402,6 +411,7 @@ struct mr get_mode (word r, word mode, word b)//register, mode of this register,
         }
 	    case 3:
         {
+            /*
 			hh.space = MEM;
 			hh.ad = reg[r];
             hh.ad = w_read(hh.ad);
@@ -411,16 +421,74 @@ struct mr get_mode (word r, word mode, word b)//register, mode of this register,
 				printf ("@(R%o)+", r);
             else
 				printf ("@#%o", hh.ad);
-            break;
+            break;*/
+            //printf ("@#%o", w_read((adr) (reg[r])));
+			if (r == 7 || r == 6 || b == 0)
+			{
+                printf ("@(R%o)+", r);
+				hh.ad = w_read ((adr) reg[r]);
+				hh.val = w_read ((adr) w_read ((adr) (reg[r])));
+				hh.space = MEM;
+				reg[r] += 2;
+			}
+			else
+			{
+                printf ("@#%o", w_read((adr) (reg[r])));
+                hh.ad = w_read ((adr) reg[r]);
+				hh.val = b_read ((adr) w_read ((adr) (reg[r])));
+				hh.space = MEM;
+				reg[r] ++;
+			}
+			break;
         }
 	    case 4:
 		{
+			printf ("-(R%o)", r);
+			if (r == 7 || r == 6 || b == 0)
+			{
+				reg[r] -= 2;
+				hh.ad = reg[r];
+				hh.val = w_read ((adr) reg[r]);
+				hh.space = MEM;
+				break;
+			}
+			else
+			{
+				reg[r] --;
+				hh.ad = reg[r];
+				hh.val = b_read ((adr) reg[r]);
+				hh.space = MEM;
+				break;
+			}
 		}
 	    case 5:
 		{
+            printf ("@-(R%o)", r);
+			reg[r] -= 2;
+			hh.ad = w_read ((adr) reg[r]);
+			hh.val = w_read ((adr) w_read ((adr) (reg[r])));
+			hh.space = MEM;
+			break;
 		}
 	    case 6:
 		{
+
+			if (r == 7)
+			{
+				hh.ad = 7;
+				hh.val = reg[7] + 2 + w_read (reg[7]);
+				reg[7] +=2;
+				hh.ad = hh.val;
+				printf ("%o", hh.val);
+			}
+			else
+			{
+				printf ("%o(R%o)", w_read (reg[7]), r);
+				hh.ad = r;
+				hh.val = w_read ((adr) reg[r] + w_read(reg[7]));
+				reg[7] += 2;
+			}
+			break;
 		}
 	}
 	return hh;
@@ -467,6 +535,7 @@ void load_file(char * file)
 void run(adr pc0, char ** argv)
 {
 	int i;
+    mem[0177564] |= 128;
 	pc = (word)pc0;                           
 	while(1)
 	{
