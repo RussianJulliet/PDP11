@@ -38,6 +38,8 @@ void do_movb(struct P_Command PC);
 void do_mov (struct P_Command PC);
 void do_add (struct P_Command PC);
 void do_sob (struct P_Command PC);
+void do_br(struct P_Command PC);
+void do_beq(struct P_Command PC);
 
 struct mr get_mode (word r, word mode, word b);
 struct P_Command
@@ -74,8 +76,10 @@ struct Command
     {	  0,	0177777,	"halt",		do_halt,	NO_PARAM		},
 	{010000,	0170000,	"mov",		do_mov, 	HAS_SS | HAS_DD	},
 	{0110000, 	0170000,	"movb", 	do_movb, 	HAS_SS | HAS_DD },
+    {000400, 	0xFF00, 	"br", 		do_br, 		HAS_XX			},
 	{060000, 	0170000,	"add",		do_add,		HAS_DD | HAS_SS	},
-	{077000,	0177000,	"sob",		do_sob,		HAS_NN			}
+	{077000,	0177000,	"sob",		do_sob,		HAS_NN			},
+    {001400, 	0xFF00,		"beq", 		do_beq, 	HAS_XX			}
 };
 
 struct mr 
@@ -193,6 +197,22 @@ void do_add(struct P_Command PC) {
     change_flag(PC);
     
 }
+
+void do_br(struct P_Command PC)
+{
+    pc += 2 * xx.val;
+    printf("\n");
+}
+
+void do_beq(struct P_Command PC)
+{
+	if(flags.Z == 1)
+	{
+		do_br(PC);
+	}
+	printf("\n");
+}
+
 
 struct P_Command create_command(word w)
 {
